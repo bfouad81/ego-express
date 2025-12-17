@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> Ego-Express </title>
+<title>Ego-Express Cargo Form</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -47,7 +46,6 @@ body {
   max-width: 100%;
 }
 
-/* Progress Bar */
 .progress-container {
   margin-bottom: 30px;
   background: #f0f0f0;
@@ -70,7 +68,6 @@ body {
   font-size: 14px;
 }
 
-/* Auto-save indicator */
 .autosave {
   position: fixed;
   top: 20px;
@@ -143,28 +140,12 @@ body {
   box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
 }
 
-.form-group input.valid {
-  border-color: #4caf50;
-}
-
-.form-group input.invalid {
-  border-color: #f44336;
-}
-
-.error-message {
-  color: #f44336;
-  font-size: 12px;
-  margin-top: 3px;
-  display: none;
-}
-
 .required::after {
   content: " *";
   color: #d32f2f;
   font-weight: bold;
 }
 
-/* Cargo Items Section */
 .cargo-items {
   margin-top: 20px;
 }
@@ -232,73 +213,6 @@ body {
   box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
 }
 
-/* File Upload Section */
-.file-upload-container {
-  margin-top: 15px;
-}
-
-.file-upload-item {
-  background: #fff;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  border: 2px dashed #d32f2f;
-}
-
-.file-upload-item label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #d32f2f;
-}
-
-.file-upload-item input[type="file"] {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.file-preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.file-preview-item {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 2px solid #e0e0e0;
-}
-
-.file-preview-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.file-preview-item .remove-file {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: #f44336;
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-}
-
-/* Checkbox group */
 .checkbox-group {
   display: flex;
   flex-wrap: wrap;
@@ -324,7 +238,6 @@ body {
   height: 16px;
 }
 
-/* Signature */
 .signature-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -354,6 +267,9 @@ body {
   display: block;
   margin: 0 auto 10px;
   touch-action: none;
+  width: 100%;
+  max-width: 350px;
+  height: 150px;
 }
 
 .btn-clear {
@@ -369,33 +285,6 @@ body {
 
 .btn-clear:hover {
   background: #e64a19;
-}
-
-/* QR Code */
-.qr-container {
-  text-align: center;
-  margin: 20px 0;
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  display: none;
-}
-
-.qr-container.show {
-  display: block;
-}
-
-.qr-container h3 {
-  color: #d32f2f;
-  margin-bottom: 15px;
-}
-
-#qrcode {
-  display: inline-block;
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .submit-btn {
@@ -466,9 +355,9 @@ body {
 <body>
 <div class="autosave" id="autosaveIndicator">💾 تم الحفظ تلقائياً</div>
 
-<div class="container">
+<div class="container" id="printableArea">
   <div class="header">
-    <h1>Cargo Acceptance & Receiving Form<br><small>نموذج قبول واستلام البضائع - محسّن</small></h1>
+    <h1>Cargo Acceptance & Receiving Form<br><small>نموذج قبول واستلام البضائع</small></h1>
     <img src="https://raw.githubusercontent.com/bfouad81/logo/main/logo-artguru.png" alt="Logo" class="logo">
   </div>
 
@@ -484,23 +373,19 @@ body {
       <div class="form-grid">
         <div class="form-group">
           <label class="required">اسم الشركة - Company Name</label>
-          <input type="text" name="receiver_company" required data-validate>
-          <span class="error-message">هذا الحقل مطلوب</span>
+          <input type="text" name="receiver_company" required>
         </div>
         <div class="form-group">
           <label class="required">العنوان - Address</label>
-          <input type="text" name="receiver_address" required data-validate>
-          <span class="error-message">هذا الحقل مطلوب</span>
+          <input type="text" name="receiver_address" required>
         </div>
         <div class="form-group">
           <label class="required">الشخص المسؤول - Contact Person</label>
-          <input type="text" name="receiver_contact" required data-validate>
-          <span class="error-message">هذا الحقل مطلوب</span>
+          <input type="text" name="receiver_contact" required>
         </div>
         <div class="form-group">
           <label class="required">الهاتف - Phone</label>
-          <input type="tel" name="receiver_phone" required data-validate pattern="[0-9+\-\s]+">
-          <span class="error-message">أدخل رقم هاتف صحيح</span>
+          <input type="tel" name="receiver_phone" required pattern="[0-9+\-\s]+">
         </div>
       </div>
     </div>
@@ -510,13 +395,11 @@ body {
       <div class="form-grid">
         <div class="form-group">
           <label class="required">اسم العميل - Customer Name</label>
-          <input type="text" name="shipper_name" required data-validate>
-          <span class="error-message">هذا الحقل مطلوب</span>
+          <input type="text" name="shipper_name" required>
         </div>
         <div class="form-group">
           <label class="required">البريد الإلكتروني - Email</label>
-          <input type="email" name="customer_email" id="customer_email" required data-validate>
-          <span class="error-message">أدخل بريد إلكتروني صحيح</span>
+          <input type="email" name="customer_email" id="customer_email" required>
         </div>
         <div class="form-group">
           <label>اسم الشركة - Company</label>
@@ -534,7 +417,7 @@ body {
       <div class="form-grid">
         <div class="form-group">
           <label class="required">المنشأ - Origin</label>
-          <input type="text" name="origin" list="origins" required data-validate>
+          <input type="text" name="origin" list="origins" required>
           <datalist id="origins">
             <option value="الإسكندرية - Alexandria">
             <option value="بورسعيد - Port Said">
@@ -542,11 +425,10 @@ body {
             <option value="السويس - Suez">
             <option value="القاهرة - Cairo">
           </datalist>
-          <span class="error-message">هذا الحقل مطلوب</span>
         </div>
         <div class="form-group">
           <label class="required">الوجهة - Destination</label>
-          <input type="text" name="destination" list="destinations" required data-validate>
+          <input type="text" name="destination" list="destinations" required>
           <datalist id="destinations">
             <option value="الإسكندرية - Alexandria">
             <option value="بورسعيد - Port Said">
@@ -554,7 +436,6 @@ body {
             <option value="السويس - Suez">
             <option value="القاهرة - Cairo">
           </datalist>
-          <span class="error-message">هذا الحقل مطلوب</span>
         </div>
         <div class="form-group">
           <label>رقم الرحلة - Voyage</label>
@@ -569,85 +450,14 @@ body {
 
     <div class="section">
       <h2>4. تفاصيل البضاعة - Cargo Details</h2>
-      <div class="cargo-items" id="cargoItems">
-        <div class="cargo-item" data-item="1">
-          <h4>
-            <span>صنف رقم 1 - Item #1</span>
-            <button type="button" class="btn-remove-item" onclick="removeCargoItem(1)" style="display:none;">حذف - Remove</button>
-          </h4>
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="required">وصف البضاعة - Description</label>
-              <textarea name="cargo_desc_1" rows="2" required></textarea>
-            </div>
-            <div class="form-group">
-              <label class="required">عدد الطرود - Packages</label>
-              <input type="number" name="cargo_pkg_1" min="0" required>
-            </div>
-            <div class="form-group">
-              <label class="required">نوع التغليف - Packaging</label>
-              <select name="cargo_pack_1" required>
-                <option value="">اختر - Select</option>
-                <option value="Box">صندوق - Box</option>
-                <option value="Pallet">طبلية - Pallet</option>
-                <option value="Crate">صندوق خشبي - Crate</option>
-                <option value="Carton">كرتونة - Carton</option>
-                <option value="Bundle">حزمة - Bundle</option>
-                <option value="Drum">برميل - Drum</option>
-                <option value="Bag">شكارة - Bag</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>الوزن - Weight (kg)</label>
-              <input type="text" name="cargo_wt_1">
-            </div>
-            <div class="form-group">
-              <label>الحجم - CBM</label>
-              <input type="text" name="cargo_cbm_1">
-            </div>
-            <div class="form-group">
-              <label>ملاحظات - Remarks</label>
-              <input type="text" name="cargo_rem_1">
-            </div>
-          </div>
-        </div>
-      </div>
+      <div class="cargo-items" id="cargoItems"></div>
       <button type="button" class="btn-add-item" onclick="addCargoItem()">
         ➕ إضافة صنف جديد - Add New Item
       </button>
     </div>
 
     <div class="section">
-      <h2>5. المستندات - Documents Upload</h2>
-      <div class="file-upload-container">
-        <div class="file-upload-item">
-          <label>📄 الفاتورة - Invoice</label>
-          <input type="file" id="invoice" accept="image/*,.pdf" onchange="previewFile(this, 'invoicePreview')">
-          <div class="file-preview" id="invoicePreview"></div>
-        </div>
-        
-        <div class="file-upload-item">
-          <label>📄 قائمة التعبئة - Packing List</label>
-          <input type="file" id="packingList" accept="image/*,.pdf" onchange="previewFile(this, 'packingPreview')">
-          <div class="file-preview" id="packingPreview"></div>
-        </div>
-        
-        <div class="file-upload-item">
-          <label>📄 شهادة المنشأ - Certificate of Origin</label>
-          <input type="file" id="coo" accept="image/*,.pdf" onchange="previewFile(this, 'cooPreview')">
-          <div class="file-preview" id="cooPreview"></div>
-        </div>
-        
-        <div class="file-upload-item">
-          <label>📸 صور البضاعة - Cargo Photos (متعددة - Multiple)</label>
-          <input type="file" id="cargoPhotos" accept="image/*" multiple onchange="previewFile(this, 'cargoPreview')">
-          <div class="file-preview" id="cargoPreview"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>6. حالة البضاعة - Cargo Condition</h2>
+      <h2>5. حالة البضاعة - Cargo Condition</h2>
       <div class="form-group">
         <label class="required">الحالة - Condition</label>
         <select name="cargo_condition" required>
@@ -665,7 +475,7 @@ body {
     </div>
 
     <div class="section">
-      <h2>7. تعليمات خاصة - Special Handling</h2>
+      <h2>6. تعليمات خاصة - Special Handling</h2>
       <div class="checkbox-group">
         <label><input type="checkbox" name="handling" value="Fragile"> قابل للكسر - Fragile</label>
         <label><input type="checkbox" name="handling" value="Upright"> وضع رأسي - Keep Upright</label>
@@ -676,42 +486,20 @@ body {
     </div>
 
     <div class="section">
-      <h2>8. التوقيعات - Signatures</h2>
+      <h2>7. التوقيعات - Signatures</h2>
       <div class="signature-container">
         <div class="signature-box">
           <h3>توقيع العميل<br>Customer Signature</h3>
-          <div class="form-group">
-            <label class="required">الاسم - Name</label>
-            <input type="text" name="cust_name" required>
-          </div>
-          <canvas id="custSignature" class="signature-pad" width="350" height="150"></canvas>
+          <canvas id="custSignature" class="signature-pad"></canvas>
           <button type="button" class="btn-clear" onclick="clearSignature('cust')">مسح - Clear</button>
-          <div class="form-group" style="margin-top:10px;">
-            <label class="required">التاريخ - Date</label>
-            <input type="date" name="cust_date" required>
-          </div>
         </div>
 
         <div class="signature-box">
           <h3>توقيع الشركة<br>Company Signature</h3>
-          <div class="form-group">
-            <label class="required">الاسم - Name</label>
-            <input type="text" name="comp_name" required>
-          </div>
-          <canvas id="compSignature" class="signature-pad" width="350" height="150"></canvas>
+          <canvas id="compSignature" class="signature-pad"></canvas>
           <button type="button" class="btn-clear" onclick="clearSignature('comp')">مسح - Clear</button>
-          <div class="form-group" style="margin-top:10px;">
-            <label class="required">التاريخ - Date</label>
-            <input type="date" name="comp_date" required>
-          </div>
         </div>
       </div>
-    </div>
-
-    <div class="qr-container" id="qrContainer">
-      <h3>🔗 رمز التتبع - Tracking QR Code</h3>
-      <div id="qrcode"></div>
-      <p style="margin-top:10px; color:#666;">امسح الرمز لتتبع الشحنة - Scan to track shipment</p>
     </div>
 
     <div class="message loading" id="loading">
@@ -726,12 +514,8 @@ body {
       ❌ حدث خطأ. الرجاء المحاولة مرة أخرى<br><span id="errorText"></span>
     </div>
 
-    <button type="button" class="submit-btn pdf-btn" onclick="generatePDF()">
-      📄 حفظ وإرسال PDF - Save & Send PDF
-    </button>
-    
-    <button type="submit" class="submit-btn" id="submitBtn">
-      إرسال النموذج - Submit Form
+    <button type="button" class="submit-btn pdf-btn" onclick="generateAndSendPDF()">
+      📄 إنشاء وإرسال PDF - Generate & Send PDF
     </button>
   </form>
 </div>
@@ -739,29 +523,322 @@ body {
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby6-lFxLML4Yd8O248aDw8kFWGNQcRbSqYd1Lc_GMgt38_EgBg8kVCE-O5XlJQADipuEA/exec';
 
-// Generate unique shipment reference
 const shipmentRef = 'EGY-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-6);
 document.getElementById('shipment_ref').value = shipmentRef;
 
-// Cargo items counter
-let cargoItemCount = 1;
+let cargoItemCount = 0;
+const signatures = {
+  cust: { canvas: null, ctx: null, drawing: false, data: '' },
+  comp: { canvas: null, ctx: null, drawing: false, data: '' }
+};
 
-// File storage
-const uploadedFiles = {};
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  addCargoItem();
+  initSignatures();
+  loadSavedData();
+  updateProgress();
+  
+  document.getElementById('cargoForm').addEventListener('input', function() {
+    updateProgress();
+    clearTimeout(window.autoSaveTimer);
+    window.autoSaveTimer = setTimeout(autoSave, 2000);
+  });
+});
 
-// Auto-save functionality
-let autoSaveTimer;
+function addCargoItem() {
+  cargoItemCount++;
+  const container = document.getElementById('cargoItems');
+  const item = document.createElement('div');
+  item.className = 'cargo-item';
+  item.setAttribute('data-item', cargoItemCount);
+  item.innerHTML = `
+    <h4>
+      <span>صنف رقم ${cargoItemCount} - Item #${cargoItemCount}</span>
+      <button type="button" class="btn-remove-item" onclick="removeCargoItem(${cargoItemCount})">حذف - Remove</button>
+    </h4>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="required">وصف البضاعة - Description</label>
+        <textarea name="cargo_desc_${cargoItemCount}" rows="2" required></textarea>
+      </div>
+      <div class="form-group">
+        <label class="required">عدد الطرود - Packages</label>
+        <input type="number" name="cargo_pkg_${cargoItemCount}" min="0" required>
+      </div>
+      <div class="form-group">
+        <label class="required">نوع التغليف - Packaging</label>
+        <select name="cargo_pack_${cargoItemCount}" required>
+          <option value="">اختر - Select</option>
+          <option value="Box">صندوق - Box</option>
+          <option value="Pallet">طبلية - Pallet</option>
+          <option value="Crate">صندوق خشبي - Crate</option>
+          <option value="Carton">كرتونة - Carton</option>
+          <option value="Bundle">حزمة - Bundle</option>
+          <option value="Drum">برميل - Drum</option>
+          <option value="Bag">شكارة - Bag</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>الوزن - Weight (kg)</label>
+        <input type="text" name="cargo_wt_${cargoItemCount}">
+      </div>
+      <div class="form-group">
+        <label>الحجم - CBM</label>
+        <input type="text" name="cargo_cbm_${cargoItemCount}">
+      </div>
+      <div class="form-group">
+        <label>ملاحظات - Remarks</label>
+        <input type="text" name="cargo_rem_${cargoItemCount}">
+      </div>
+    </div>
+  `;
+  container.appendChild(item);
+  updateProgress();
+}
+
+function removeCargoItem(itemNum) {
+  if (cargoItemCount <= 1) {
+    alert('يجب أن يكون هناك صنف واحد على الأقل - At least one item is required');
+    return;
+  }
+  const item = document.querySelector(`[data-item="${itemNum}"]`);
+  if (item) {
+    item.remove();
+    cargoItemCount--;
+    updateProgress();
+  }
+}
+
+function initSignatures() {
+  ['cust', 'comp'].forEach(type => {
+    const canvas = document.getElementById(type + 'Signature');
+    signatures[type].canvas = canvas;
+    signatures[type].ctx = canvas.getContext('2d');
+    
+    canvas.addEventListener('mousedown', startDrawing.bind(null, type));
+    canvas.addEventListener('mousemove', draw.bind(null, type));
+    canvas.addEventListener('mouseup', stopDrawing.bind(null, type));
+    canvas.addEventListener('mouseout', stopDrawing.bind(null, type));
+    
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startDrawing(type, e);
+    });
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      draw(type, e);
+    });
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      stopDrawing(type, e);
+    });
+  });
+}
+
+function startDrawing(type, e) {
+  signatures[type].drawing = true;
+  const pos = getMousePos(signatures[type].canvas, e);
+  signatures[type].ctx.beginPath();
+  signatures[type].ctx.moveTo(pos.x, pos.y);
+}
+
+function draw(type, e) {
+  if (!signatures[type].drawing) return;
+  const pos = getMousePos(signatures[type].canvas, e);
+  signatures[type].ctx.lineTo(pos.x, pos.y);
+  signatures[type].ctx.strokeStyle = '#000';
+  signatures[type].ctx.lineWidth = 2;
+  signatures[type].ctx.stroke();
+}
+
+function stopDrawing(type, e) {
+  if (signatures[type].drawing) {
+    signatures[type].drawing = false;
+    signatures[type].data = signatures[type].canvas.toDataURL();
+  }
+}
+
+function getMousePos(canvas, e) {
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+  const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+  return {
+    x: clientX - rect.left,
+    y: clientY - rect.top
+  };
+}
+
+function clearSignature(type) {
+  signatures[type].ctx.clearRect(0, 0, signatures[type].canvas.width, signatures[type].canvas.height);
+  signatures[type].data = '';
+}
+
+function updateProgress() {
+  const inputs = document.querySelectorAll('input[required], select[required], textarea[required]');
+  let filled = 0;
+  inputs.forEach(input => {
+    if (input.value.trim() !== '') filled++;
+  });
+  const progress = Math.round((filled / inputs.length) * 100);
+  const bar = document.getElementById('progressBar');
+  bar.style.width = progress + '%';
+  bar.textContent = progress + '%';
+}
+
 function autoSave() {
   const formData = new FormData(document.getElementById('cargoForm'));
   const data = {};
   for (let [key, value] of formData.entries()) {
     data[key] = value;
   }
-  localStorage.setItem('cargoFormData', JSON.stringify(data));
-  
-  const indicator = document.getElementById('autosaveIndicator');
-  indicator.classList.add('show');
-  setTimeout(() => indicator.classList.remove('show'), 2000);
+  try {
+    window.cargoFormData = data;
+    const indicator = document.getElementById('autosaveIndicator');
+    indicator.classList.add('show');
+    setTimeout(() => indicator.classList.remove('show'), 2000);
+  } catch(e) {
+    console.log('Auto-save skipped');
+  }
 }
 
-// Loa
+function loadSavedData() {
+  if (window.cargoFormData) {
+    for (let key in window.cargoFormData) {
+      const input = document.querySelector(`[name="${key}"]`);
+      if (input) input.value = window.cargoFormData[key];
+    }
+  }
+}
+
+async function generateAndSendPDF() {
+  if (!document.getElementById('cargoForm').checkValidity()) {
+    alert('الرجاء ملء جميع الحقول المطلوبة - Please fill all required fields');
+    document.getElementById('cargoForm').reportValidity();
+    return;
+  }
+
+  if (!signatures.cust.data || !signatures.comp.data) {
+    alert('الرجاء التوقيع في كلا الحقلين - Please sign both signature fields');
+    return;
+  }
+
+  const customerEmail = document.getElementById('customer_email').value;
+  if (!customerEmail) {
+    alert('الرجاء إدخال البريد الإلكتروني للعميل - Please enter customer email');
+    return;
+  }
+
+  document.getElementById('loading').classList.add('active');
+  document.getElementById('successMessage').classList.remove('active');
+  document.getElementById('errorMessage').classList.remove('active');
+
+  try {
+    const printArea = document.getElementById('printableArea');
+    const buttons = printArea.querySelectorAll('.submit-btn, .btn-clear, .btn-add-item, .btn-remove-item, .progress-container');
+    buttons.forEach(btn => btn.style.display = 'none');
+
+    const canvas = await html2canvas(printArea, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff'
+    });
+
+    buttons.forEach(btn => btn.style.display = '');
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+    const imgWidth = 210;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= 297;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= 297;
+    }
+
+    const pdfBase64 = pdf.output('datauristring').split(',')[1];
+
+    const formData = collectFormData();
+    formData.pdfData = pdfBase64;
+    formData.customerEmail = customerEmail;
+    formData.custSignature = signatures.cust.data.split(',')[1];
+    formData.compSignature = signatures.comp.data.split(',')[1];
+
+    const response = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(formData)
+    });
+
+    const result = await response.json();
+
+    document.getElementById('loading').classList.remove('active');
+
+    if (result.status === 'success') {
+      document.getElementById('successMessage').classList.add('active');
+      setTimeout(() => {
+        if (confirm('هل تريد إنشاء نموذج جديد؟ - Create new form?')) {
+          location.reload();
+        }
+      }, 3000);
+    } else {
+      throw new Error(result.message || 'Unknown error');
+    }
+
+  } catch (error) {
+    console.error('Error:', error);
+    document.getElementById('loading').classList.remove('active');
+    document.getElementById('errorMessage').classList.add('active');
+    document.getElementById('errorText').textContent = error.message;
+  }
+}
+
+function collectFormData() {
+  const formData = {};
+  const form = document.getElementById('cargoForm');
+  const inputs = form.querySelectorAll('input, select, textarea');
+  
+  inputs.forEach(input => {
+    if (input.type === 'checkbox') {
+      const name = input.name;
+      if (!formData[name]) formData[name] = [];
+      if (input.checked) formData[name].push(input.value);
+    } else if (input.name) {
+      formData[input.name] = input.value;
+    }
+  });
+
+  const cargoItems = [];
+  for (let i = 1; i <= cargoItemCount; i++) {
+    const item = document.querySelector(`[data-item="${i}"]`);
+    if (item) {
+      cargoItems.push({
+        description: formData[`cargo_desc_${i}`] || '',
+        packages: formData[`cargo_pkg_${i}`] || '',
+        packaging: formData[`cargo_pack_${i}`] || '',
+        weight: formData[`cargo_wt_${i}`] || '',
+        cbm: formData[`cargo_cbm_${i}`] || '',
+        remarks: formData[`cargo_rem_${i}`] || ''
+      });
+    }
+  }
+  formData.cargoItems = JSON.stringify(cargoItems);
+
+  if (Array.isArray(formData.handling)) {
+    formData.handling = formData.handling.join(', ');
+  }
+
+  formData.submissionDate = new Date().toISOString();
+
+  return formData;
+}
+</script>
+</body>
+</html>

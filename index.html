@@ -6,7 +6,6 @@
 <title>Bassem Fouad</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -371,32 +370,6 @@ body {
   background: #e64a19;
 }
 
-/* QR Code */
-.qr-container {
-  text-align: center;
-  margin: 20px 0;
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  display: none;
-}
-
-.qr-container.show {
-  display: block;
-}
-
-.qr-container h3 {
-  color: #d32f2f;
-  margin-bottom: 15px;
-}
-
-#qrcode {
-  display: inline-block;
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
 
 .submit-btn {
   background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
@@ -722,12 +695,6 @@ body {
       </div>
     </div>
 
-    <div class="qr-container" id="qrContainer">
-      <h3>🔗 رمز التتبع - Tracking QR Code</h3>
-      <div id="qrcode"></div>
-      <p style="margin-top:10px; color:#666;">امسح الرمز لتتبع الشحنة - Scan to track shipment</p>
-    </div>
-
     <div class="message loading" id="loading">
       ⏳ جاري الإرسال... الرجاء الانتظار<br>Sending... Please wait
     </div>
@@ -1019,25 +986,6 @@ function isCanvasSigned(canvas) {
   return pixelBuffer.some(color => color !== 0);
 }
 
-// Generate QR Code
-function generateQRCode() {
-  const qrContainer = document.getElementById('qrcode');
-  qrContainer.innerHTML = '';
-  
-  const trackingUrl = `https://yourcompany.com/track?ref=${shipmentRef}`;
-  
-  new QRCode(qrContainer, {
-    text: trackingUrl,
-    width: 200,
-    height: 200,
-    colorDark: "#d32f2f",
-    colorLight: "#ffffff",
-    correctLevel: QRCode.CorrectLevel.H
-  });
-  
-  document.getElementById('qrContainer').classList.add('show');
-}
-
 // Generate PDF - Optimized version
 async function generatePDF() {
   if (!isCanvasSigned(custCanvas) || !isCanvasSigned(compCanvas)) {
@@ -1048,9 +996,7 @@ async function generatePDF() {
   const pdfBtn = event.target;
   pdfBtn.disabled = true;
   pdfBtn.textContent = '⏳ جاري إنشاء PDF... Creating PDF...';
-  
-  generateQRCode();
-  
+    
   const container = document.querySelector('.container');
   const buttons = document.querySelectorAll('button');
   const progressBar = document.querySelector('.progress-container');

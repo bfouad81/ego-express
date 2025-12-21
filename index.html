@@ -761,6 +761,7 @@ const translations = {
     address: "Address",
     email: "Email",
     company: "Company Name",
+    location: "Location",
     transport: "Mode of Transport",
     shipmentType: "Shipment Type",
     description: "Description",
@@ -809,6 +810,7 @@ const translations = {
     addressPlaceholder: "123 Street Name, City",
     emailPlaceholder: "email@example.com",
     companyPlaceholder: "Company Ltd.",
+    locationPlaceholder: "Click to get current location",
     descriptionPlaceholder: "Electronics, Furniture, etc."
   },
   ar: {
@@ -829,6 +831,7 @@ const translations = {
     address: "العنوان",
     email: "البريد الإلكتروني",
     company: "اسم الشركة",
+    location: "الموقع",
     transport: "وسيلة النقل",
     shipmentType: "نوع الشحنة",
     description: "الوصف",
@@ -877,6 +880,7 @@ const translations = {
     addressPlaceholder: "١٢٣ اسم الشارع، المدينة",
     emailPlaceholder: "email@example.com",
     companyPlaceholder: "شركة المثال المحدودة",
+    locationPlaceholder: "اضغط للحصول على الموقع الحالي",
     descriptionPlaceholder: "إلكترونيات، أثاث، إلخ"
   }
 };
@@ -1297,6 +1301,121 @@ function saveToHistory(formData) {
   } catch (e) {}
 }
 
+// ============= GEOLOCATION =============
+document.addEventListener('DOMContentLoaded', function() {
+  // Add event listeners to location buttons
+  document.querySelectorAll('.location-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const type = this.getAttribute('data-type');
+      getLocation(type);
+    });
+  });
+  
+  // Add click event to location fields to open map
+  document.querySelectorAll('#customerLocation, #consigneeLocation').forEach(field => {
+    field.addEventListener('click', function() {
+      const lat = this.getAttribute('data-lat');
+      const lng = this.getAttribute('data-lng');
+      if (lat && lng) {
+        window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+      }
+    });
+  });
+});
+
+function getLocation(type) {
+  const field = document.getElementById(type + 'Location');
+  const btn = document.querySelector(`.location-btn[data-type="${type}"]`);
+  
+  if (!navigator.geolocation) {
+    showToast('error', currentLang === 'ar' ? 'المتصفح لا يدعم تحديد الموقع' : 'Geolocation is not supported');
+    return;
+  }
+  
+  // Show loading
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  btn.disabled = true;
+  field.value = currentLang === 'ar' ? 'جاري تحديد الموقع...' : 'Getting location...';
+  
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      
+      try {
+        // Get address from coordinates
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+          headers: {
+            'User-Agent': 'CargoForm/1.0'
+          }
+        });
+        
+        if (!response.ok) throw new Error('Geocoding failed');
+        
+        const data = await response.json();
+        
+        let address = data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        
+        field.value = address;
+        field.setAttribute('data-lat', lat);
+        field.setAttribute('data-lng', lng);
+        field.classList.add('filled');
+        field.style.cursor = 'pointer';
+        field.title = currentLang === 'ar' ? 'اضغط لفتح في خرائط جوجل' : 'Click to open in Google Maps';
+        
+        showToast('success', currentLang === 'ar' ? 'تم تحديد الموقع بنجاح ✓' : 'Location obtained successfully ✓');
+        updateProgress();
+        autoSave();
+        
+      } catch (error) {
+        console.error('Geocoding error:', error);
+        // Fallback to coordinates only
+        const coords = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        field.value = coords;
+        field.setAttribute('data-lat', lat);
+        field.setAttribute('data-lng', lng);
+        field.classList.add('filled');
+        field.style.cursor = 'pointer';
+        field.title = currentLang === 'ar' ? 'اضغط لفتح في خرائط جوجل' : 'Click to open in Google Maps';
+        
+        showToast('success', currentLang === 'ar' ? 'تم تحديد الموقع بنجاح ✓' : 'Location obtained successfully ✓');
+        updateProgress();
+        autoSave();
+      }
+      
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+    },
+    (error) => {
+      let errorMsg = '';
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          errorMsg = currentLang === 'ar' ? 'تم رفض الإذن بالوصول للموقع. يرجى السماح بالوصول للموقع من إعدادات المتصفح.' : 'Location permission denied. Please allow location access.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMsg = currentLang === 'ar' ? 'الموقع غير متاح حالياً' : 'Location unavailable';
+          break;
+        case error.TIMEOUT:
+          errorMsg = currentLang === 'ar' ? 'انتهت مهلة طلب الموقع' : 'Location request timeout';
+          break;
+        default:
+          errorMsg = currentLang === 'ar' ? 'خطأ في الحصول على الموقع' : 'Error getting location';
+      }
+      
+      field.value = '';
+      showToast('error', errorMsg);
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    }
+  );
+}
+
 // ============= TOAST NOTIFICATIONS =============
 function showToast(type, message) {
   const toast = document.getElementById('toast');
@@ -1445,11 +1564,17 @@ async function confirmSend() {
       customerPhone: document.getElementById('customerPhone').value,
       customerAddress: document.getElementById('customerAddress').value,
       customerEmail: document.getElementById('customerEmail').value,
+      customerLocation: document.getElementById('customerLocation').value,
+      customerLocationLat: document.getElementById('customerLocation').getAttribute('data-lat') || '',
+      customerLocationLng: document.getElementById('customerLocation').getAttribute('data-lng') || '',
       consigneeName: document.getElementById('consigneeName').value,
       consigneePhone: document.getElementById('consigneePhone').value,
       consigneeAddress: document.getElementById('consigneeAddress').value,
       consigneeEmail: document.getElementById('consigneeEmail').value,
       consigneeCompany: document.getElementById('consigneeCompany').value,
+      consigneeLocation: document.getElementById('consigneeLocation').value,
+      consigneeLocationLat: document.getElementById('consigneeLocation').getAttribute('data-lat') || '',
+      consigneeLocationLng: document.getElementById('consigneeLocation').getAttribute('data-lng') || '',
       transportMode: document.getElementById('transportMode').value,
       shipmentType: document.getElementById('shipmentType').value,
       goodsDescription: document.getElementById('goodsDescription').value,

@@ -218,7 +218,7 @@ input.filled,select.filled{background:var(--soft);border-color:var(--red);}
 <div class="section-title">Cargo Description (As Declared by Shipper)</div>
 <p class="note">All information as declared by shipper</p>
 <div id="cargoContainer">
-<div class="Cargo-Description-(As-Declared-by-Shipper)" data-item="1">
+<div class="cargo-item" data-item="1">
 <div class="row">
 <div class="col-6"><label>Description *</label><input class="desc" required><span class="error-msg">Required</span></div>
 <div class="col-3"><label>Packaging *</label><select class="pack" required><option value="">Select</option><option>Box</option><option>Pallet</option><option>Crate</option><option>Drum</option><option>Bag</option></select><span class="error-msg">Required</span></div>
@@ -232,7 +232,7 @@ input.filled,select.filled{background:var(--soft);border-color:var(--red);}
 </div>
 
 <div class="section hide-pdf">
-<div class="section-title">Documents </div>
+<div class="section-title">Documents (Multiple Files)</div>
 <div class="row">
 <div class="col-4"><label>Invoice(s)</label><input type="file" id="f1" multiple accept=".pdf,.jpg,.png" onchange="showFiles(this,'l1')"><div class="file-list" id="l1"></div></div>
 <div class="col-4"><label>Packing List(s)</label><input type="file" id="f2" multiple accept=".pdf,.jpg,.png" onchange="showFiles(this,'l2')"><div class="file-list" id="l2"></div></div>

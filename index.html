@@ -213,6 +213,7 @@ input.filled,select.filled{background:var(--soft);border-color:var(--red);}
 <div class="col-6"><label>Shipment Type *</label><select id="shipmentType" required><option value="">Select</option><option>LTL</option><option>FTL</option><option>Courier</option><option>Other</option></select><span class="error-msg" id="err-shipmentType">Required</span></div>
 </div>
 </div>
+
 <div class="section">
 <div class="section-title">Cargo Description (As Declared by Shipper)</div>
 <p class="note">All information as declared by shipper</p>
@@ -301,7 +302,59 @@ function showFiles(input,listId){
   }
 }
 
-function fileToBase64(file){
+// ✅ دالة ضغط الصور قبل التحويل لـ Base64
+async function fileToBase64(file){
+  // لو الملف PDF، ارجعه زي ما هو
+  if(file.type === 'application/pdf'){
+    return new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=()=>res(r.result);
+      r.onerror=rej;
+      r.readAsDataURL(file);
+    });
+  }
+  
+  // لو صورة، اضغطها الأول
+  if(file.type.startsWith('image/')){
+    return new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=(e)=>{
+        const img=new Image();
+        img.onload=()=>{
+          const canvas=document.createElement('canvas');
+          let w=img.width;
+          let h=img.height;
+          
+          // 🔹 تصغير الأبعاد لو الصورة كبيرة
+          const maxSize=1200;
+          if(w>maxSize || h>maxSize){
+            if(w>h){
+              h=(h/w)*maxSize;
+              w=maxSize;
+            }else{
+              w=(w/h)*maxSize;
+              h=maxSize;
+            }
+          }
+          
+          canvas.width=w;
+          canvas.height=h;
+          const ctx=canvas.getContext('2d');
+          ctx.drawImage(img,0,0,w,h);
+          
+          // 🔹 ضغط الجودة إلى 60%
+          const compressed=canvas.toDataURL('image/jpeg',0.6);
+          res(compressed);
+        };
+        img.onerror=rej;
+        img.src=e.target.result;
+      };
+      r.onerror=rej;
+      r.readAsDataURL(file);
+    });
+  }
+  
+  // لو نوع تاني، ارجعه عادي
   return new Promise((res,rej)=>{
     const r=new FileReader();
     r.onload=()=>res(r.result);

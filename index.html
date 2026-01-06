@@ -450,7 +450,7 @@ document.getElementById('emailBtn').addEventListener('click',async function(){
     this.textContent='Sending...';
     
     // الإرسال
-    fetch('https://script.google.com/macros/s/AKfycbwjr8H5QXi_U6aAH4IBbrGSWaasId4ymUhkuJxG-iwGXga_Ule33l9WzsyecbKI4kjr/exec',{
+    fetch('https://script.google.com/macros/s/AKfycbxHY4AWu-E4-jKiYuqLgiEMFJxT3KKqhuXfCeVfcTlAa6bQH9O9cxsj5g4m0SxjLXs/exec',{
       method:'POST',
       mode:'no-cors',
       body:new URLSearchParams({data:JSON.stringify(data),pdfData:pdf,timestamp:Date.now()})

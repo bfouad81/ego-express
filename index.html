@@ -35,100 +35,7 @@ input.filled,select.filled{background:var(--soft);border-color:var(--red);}
 .submit-btn{width:100%;padding:18px;border:none;background:var(--red);color:#fff;font-size:16px;cursor:pointer;border-radius:8px;margin-top:10px;}
 .submit-btn:disabled{opacity:0.6;cursor:not-allowed;}
 .hide-pdf{display:block;}
-@media print {
-  * {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  
-  body {
-    background: white !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .form-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 2mm !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    font-size: 8px !important;
-    line-height: 1.1 !important;
-  }
-
-  .header {
-    display: flex !important;
-    padding: 3mm 0 !important;
-    margin-bottom: 2mm !important;
-    border-bottom: 2px solid var(--red) !important;
-  }
-  
-  .logo img {
-    max-height: 40px !important;
-  }
-  
-  .header-text h2 {
-    font-size: 14px !important;
-    margin: 0 !important;
-  }
-
-.section {
-  page-break-inside: avoid !important;
-  break-inside: avoid !important;
-  padding: 3mm !important;
-  margin-bottom: 1mm !important;
-  border-bottom: 1px solid #ddd !important;
-}
-  
-  .section-title {
-    padding: 2mm 3mm !important;
-    margin-bottom: 2mm !important;
-    font-size: 10px !important;
-  }
-  
-  .note {
-    font-size: 8px !important;
-    margin: 1mm 0 !important;
-  }
-  
-  .row {
-    gap: 2mm !important;
-    margin-bottom: 1mm !important;
-  }
-
-  label {
-    font-size: 8px !important;
-    margin-bottom: 0.5mm !important;
-    display: block !important;
-  }
-  
-  input, select, textarea {
-    font-size: 8px !important;
-    padding: 1mm !important;
-    margin-top: 0.5mm !important;
-    border: 1px solid #ddd !important;
-  }
-  
-  .cargo-item {
-    padding: 2mm !important;
-    margin-bottom: 2mm !important;
-  }
-
-  .signature-box {
-    height: 80px !important;
-    border: 1px solid #ddd !important;
-  }
-
-  button {
-    display: none !important;
-  }
-  
-  .hide-pdf {
-    display: none !important;
-  }
-}
+@media print{.hide-pdf{display:none!important;}}
 @media(max-width:900px){.col-1,.col-2,.col-3,.col-4,.col-6{grid-column:span 12!important;}}
 /* ===== تعديل الطباعة والـ PDF ===== */
 @page {
@@ -215,7 +122,7 @@ input.filled,select.filled{background:var(--soft);border-color:var(--red);}
 </div>
 
 <div class="section">
-<div class="section-title">Cargo Description (As Declared by Shipper)</div>
+<div class="section-title">Cargo Items</div>
 <p class="note">All information as declared by shipper</p>
 <div id="cargoContainer">
 <div class="cargo-item" data-item="1">
@@ -302,59 +209,7 @@ function showFiles(input,listId){
   }
 }
 
-// ✅ دالة ضغط الصور قبل التحويل لـ Base64
-async function fileToBase64(file){
-  // لو الملف PDF، ارجعه زي ما هو
-  if(file.type === 'application/pdf'){
-    return new Promise((res,rej)=>{
-      const r=new FileReader();
-      r.onload=()=>res(r.result);
-      r.onerror=rej;
-      r.readAsDataURL(file);
-    });
-  }
-  
-  // لو صورة، اضغطها الأول
-  if(file.type.startsWith('image/')){
-    return new Promise((res,rej)=>{
-      const r=new FileReader();
-      r.onload=(e)=>{
-        const img=new Image();
-        img.onload=()=>{
-          const canvas=document.createElement('canvas');
-          let w=img.width;
-          let h=img.height;
-          
-          // 🔹 تصغير الأبعاد لو الصورة كبيرة
-          const maxSize=1200;
-          if(w>maxSize || h>maxSize){
-            if(w>h){
-              h=(h/w)*maxSize;
-              w=maxSize;
-            }else{
-              w=(w/h)*maxSize;
-              h=maxSize;
-            }
-          }
-          
-          canvas.width=w;
-          canvas.height=h;
-          const ctx=canvas.getContext('2d');
-          ctx.drawImage(img,0,0,w,h);
-          
-          // 🔹 ضغط الجودة إلى 60%
-          const compressed=canvas.toDataURL('image/jpeg',0.6);
-          res(compressed);
-        };
-        img.onerror=rej;
-        img.src=e.target.result;
-      };
-      r.onerror=rej;
-      r.readAsDataURL(file);
-    });
-  }
-  
-  // لو نوع تاني، ارجعه عادي
+function fileToBase64(file){
   return new Promise((res,rej)=>{
     const r=new FileReader();
     r.onload=()=>res(r.result);
@@ -411,22 +266,22 @@ document.getElementById('pdfBtn').addEventListener('click',function(){
   if(!validate())return;
   document.querySelectorAll('.hide-pdf').forEach(e=>e.style.display='none');
  
-const opt={
-  margin: 0,
-  filename: 'Cargo.pdf',
+ const opt = {
+  margin: 5,
+  filename: 'Cargo_Acceptance_Form.pdf',
   image: { type: 'jpeg', quality: 0.98 },
-  html2canvas: { 
-    scale: 2,
-    scrollY: 0,
-    scrollX: 0,
-    useCORS: true,
-    allowTaint: true,
-    windowHeight: document.querySelector('.form-container').scrollHeight + 50
+  html2canvas: {
+    scale: 1.1,
+    scrollY: 0
   },
-  jsPDF: { 
-    unit: 'mm', 
-    format: 'a4', 
-    orientation: 'portrait'
+  jsPDF: {
+    unit: 'mm',
+    format: 'a4',
+    orientation: 'portrait',
+	margin: 5
+  },
+  pagebreak: {
+    mode: ['avoid-all', 'css']
   }
 };
 
@@ -469,53 +324,25 @@ document.getElementById('emailBtn').addEventListener('click',async function(){
   try{
     this.disabled=true;
     this.textContent='Creating PDF...';
-    
-    // إخفاء الأزرار
     document.querySelectorAll('.hide-pdf').forEach(e=>e.style.display='none');
-    await new Promise(r => setTimeout(r, 100));
-    
-    const element = document.querySelector('.form-container');
-    
-    // ✅ إعدادات مبسطة وفعالة
-    const opt = {
-      margin: [5, 5, 5, 5],
-      filename: 'Cargo.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        scrollY: -window.scrollY
-      },
-      jsPDF: { 
-        unit: 'mm', 
-        format: 'a4', 
-        orientation: 'portrait'
-      }
-    };
-    
-    // ✅ إنشاء PDF بطريقة بسيطة
-    const pdf = await html2pdf().set(opt).from(element).outputPdf('dataurlstring');
-    
-    // إظهار الأزرار
+    const opt={margin:5,filename:'Cargo.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+    const pdf=await html2pdf().set(opt).from(document.querySelector('.form-container')).outputPdf('dataurlstring');
     document.querySelectorAll('.hide-pdf').forEach(e=>e.style.display='');
-    
     this.textContent='Sending...';
     
-    // الإرسال
-    fetch('https://script.google.com/macros/s/AKfycbwjr8H5QXi_U6aAH4IBbrGSWaasId4ymUhkuJxG-iwGXga_Ule33l9WzsyecbKI4kjr/exec',{
+    const res=await fetch ('https://script.google.com/macros/s/AKfycbwjr8H5QXi_U6aAH4IBbrGSWaasId4ymUhkuJxG-iwGXga_Ule33l9WzsyecbKI4kjr/exec',{
       method:'POST',
-      mode:'no-cors',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
       body:new URLSearchParams({data:JSON.stringify(data),pdfData:pdf,timestamp:Date.now()})
     });
     
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    alert('Sent successfully!');
-    location.reload();
-    
+    const result=await res.json();
+    if(result.status==='success'){
+      alert('Sent successfully!');
+      location.reload();
+    }else{throw new Error(result.message||'Error');}
   }catch(e){
     alert('Error: '+e.message);
-    document.querySelectorAll('.hide-pdf').forEach(e=>e.style.display='');
   }finally{
     this.disabled=false;
     this.textContent='Send Email';
